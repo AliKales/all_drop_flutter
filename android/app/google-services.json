@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "536746077626",
+    "project_id": "drop-1111",
+    "storage_bucket": "drop-1111.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536746077626:android:ab8849ba2f41908be98183",
+        "android_client_info": {
+          "package_name": "com.caroby.all_drop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "536746077626-dcb7p0kn3bah08011kcns1e14313io28.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8lP8exURIYenFN6rFSsPyYit0wab3wH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "536746077626-dcb7p0kn3bah08011kcns1e14313io28.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "536746077626-chiot0qqo4ivrebkc3tpn2fkp7mhsmgi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.caroby.AllDrop"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
