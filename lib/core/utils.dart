@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../common_libs.dart';
 import 'firebase/f_auth.dart';
@@ -69,4 +71,24 @@ class Utils {
     return varToReturn;
   }
 
+  static Future<bool> askPermissions(List<Permission> permissions) async {
+    Map<Permission, PermissionStatus> statuses = await permissions.request();
+
+    return statuses.values
+            .toList()
+            .indexWhere((element) => element != PermissionStatus.granted) ==
+        -1;
+  }
+
+  static Future<bool> isFileExists(String path) async {
+    return await File(path).exists();
+  }
+
+  static Future copyToClipBoard(
+    String value, [
+    String? message,
+    BuildContext? context,
+  ]) async {
+    await Clipboard.setData(ClipboardData(text: value));
+  }
 }

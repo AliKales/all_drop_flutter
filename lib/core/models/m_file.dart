@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class MFile {
+class MFile extends Equatable {
   String? downloadUrl;
   String? fileName;
   int? fileSize;
@@ -14,6 +15,10 @@ class MFile {
     this.fileType,
     this.uploadDate,
   });
+
+  @override
+  List<Object> get props =>
+      [downloadUrl ?? "", fileName ?? "", fileSize ?? "", fileType ?? ""];
 
   Map<String, dynamic> toJson() {
     return {

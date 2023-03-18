@@ -1,4 +1,6 @@
+import 'package:all_drop/pages/error.dart';
 import 'package:all_drop/pages/main_page/main_page_view.dart';
+import 'package:all_drop/pages/phone_page/phone_page_view.dart';
 import 'package:all_drop/settings.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,6 +11,8 @@ import 'pages/auth_page/auth_page_view.dart';
 class PagePaths {
   static String main = "/";
   static String auth = "/auth";
+  static String error = "/error";
+  static String phone = "/phone";
 }
 
 final appRouter = GoRouter(
@@ -20,9 +24,10 @@ final appRouter = GoRouter(
       return PagePaths.auth;
     }
 
-    // if (!FAuth.isEmailVerified) {
-    //   return PagePaths.verify;
-    // }
+    if (FAuth.getPhone == "") {
+      Settings.routes.add(PagePaths.phone);
+      return PagePaths.phone;
+    }
 
     if (FAuth.isSignedIn && AppRoute.isLocation(state, PagePaths.auth)) {
       Settings.routes.add(PagePaths.main);
@@ -36,6 +41,12 @@ final appRouter = GoRouter(
   routes: [
     AppRoute(PagePaths.main, (s) => const MainPageView()),
     AppRoute(PagePaths.auth, (s) => const AuthPageView()),
+    AppRoute(PagePaths.phone, (s) => const PhonePageView()),
+    AppRoute(
+        PagePaths.error,
+        (s) => const ErrorPage(
+              error: "asdkas mkdkas dkasd",
+            )),
   ],
 );
 

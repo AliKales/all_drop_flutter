@@ -44,6 +44,18 @@ extension IntExtension on int {
   int toRandom(int max) {
     return Random().nextInt(max) + this;
   }
+
+  String get byte {
+    int length = toString().length;
+
+    if (length >= 4 && length <= 6) {
+      return "${this / 1000} KB";
+    } else if (length >= 7 && length <= 9) {
+      return "${this / 1000000} MB";
+    } else {
+      return "${this / 1000000000} GB";
+    }
+  }
 }
 
 extension ContextExtension on BuildContext {

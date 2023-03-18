@@ -8,6 +8,8 @@ import '../../common_libs.dart';
 enum LastProgress { signUp, logIn }
 
 class FAuth {
+  static String _verificationId = "";
+
   static String lastEmail = "";
   static String lastPassword = "";
   static LastProgress? lastProgress;
@@ -20,6 +22,10 @@ class FAuth {
 
   static String? get getEmail => FirebaseAuth.instance.currentUser?.email;
   static String? get getUid => FirebaseAuth.instance.currentUser?.uid;
+  static String? get getPhone =>
+      FirebaseAuth.instance.currentUser?.phoneNumber ?? "";
+
+  static PhoneAuthCredential? pAC;
 
   static void sendVerification() =>
       FirebaseAuth.instance.currentUser!.sendEmailVerification();
@@ -124,16 +130,59 @@ class FAuth {
     if (e == 'user-not-found') {
       lastEmail = emailAddress;
       CustomSnackbar.showSnackBar(
-          context: context, text: 'No user found for that email.');
+          context: context, text: 'Wrong email or password!');
       return;
     } else if (e == 'wrong-password') {
       lastPassword = password;
       CustomSnackbar.showSnackBar(
-          context: context, text: 'Wrong password provided for that user.');
+          context: context, text: 'Wrong email or password!');
       return;
     }
 
     CustomSnackbar.showSnackBar(
         context: context, text: 'Something went wrong!');
+  }
+
+  static Future verifyPhoneNumber({
+    required VoidCallback codeSent,
+    required Function(String error) onError,
+    required String phoneNumber,
+  }) async {
+    FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (phoneAuthCredential) async {
+        pAC = phoneAuthCredential;
+        codeSent.call();
+      },
+      verificationFailed: (error) {
+        onError.call(error.message ?? "Error");
+      },
+      codeSent: (verificationId, forceResendingToken) {
+        _verificationId = verificationId;
+        codeSent.call();
+      },
+      codeAutoRetrievalTimeout: (verificationId) {
+        _verificationId = verificationId;
+        codeSent.call();
+      },
+    );
+  }
+
+  static Future<String> updatePhoneNumber(
+    String smsCode,
+  ) async {
+    try {
+      var phoneAuthCredential = pAC ??
+          PhoneAuthProvider.credential(
+              verificationId: _verificationId, smsCode: smsCode);
+
+      await FirebaseAuth.instance.currentUser
+          ?.updatePhoneNumber(phoneAuthCredential);
+      return "";
+    } on FirebaseAuthException catch (e) {
+      return e.message ?? "Error";
+    } catch (_) {
+      return "Error";
+    }
   }
 }

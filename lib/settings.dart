@@ -4,4 +4,6 @@ class Settings {
   static bool isMeChecked = false;
 
   static List<String> routes = [PagePaths.main];
+
+  static String pathToDownloadFile = "/storage/emulated/0/Download";
 }

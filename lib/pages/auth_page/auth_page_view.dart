@@ -1,5 +1,6 @@
 import 'package:all_drop/common_libs.dart';
 import 'package:all_drop/core/firebase/f_auth.dart';
+import 'package:all_drop/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uikit/uikit.dart';
 
@@ -36,7 +37,7 @@ class _AuthPageViewState extends State<AuthPageView> {
         context, _tECUsername.textTrim, _tECPassword.textTrim);
 
     if (result) {
-      context.go("/");
+      context.go(PagePaths.main);
     }
   }
 
@@ -59,12 +60,19 @@ class _AuthPageViewState extends State<AuthPageView> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            TextField(controller: _tECUsername),
+            const Spacer(),
+            TextField(
+              controller: _tECUsername,
+              decoration: const InputDecoration(labelText: "Email"),
+            ),
             TextField(
               controller: _tECPassword,
+              decoration: const InputDecoration(labelText: "Password"),
             ),
+            const Spacer(),
             ElevatedButton(onPressed: _logIn, child: const Text("Log In")),
-            TextButton(onPressed: _signUp, child: const Text("Sign Up"))
+            TextButton(onPressed: _signUp, child: const Text("Sign Up")),
+            const Spacer(),
           ],
         ),
       ),
