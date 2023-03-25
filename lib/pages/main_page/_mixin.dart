@@ -7,7 +7,7 @@ mixin _Mixin<T extends StatefulWidget> on State<T> {
         title: "Upgrade",
         text: "To upgrade your total size, please contact us via email!",
         actions: [
-          TextButton(onPressed: copyEmail, child: Text("Copy Email")),
+          TextButton(onPressed: copyEmail, child: const Text("Copy Email")),
         ]);
   }
 

@@ -10,8 +10,8 @@ import 'package:all_drop/core/utils.dart';
 import 'package:all_drop/router.dart';
 import 'package:all_drop/settings.dart';
 import 'package:all_drop/widgets/simple_buttons.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:uikit/uikit.dart';
 
 import '../../core/firebase/f_auth.dart';
@@ -25,7 +25,7 @@ class MainPageView extends StatefulWidget {
   State<MainPageView> createState() => _MainPageViewState();
 }
 
-class _MainPageViewState extends State<MainPageView> with _Mixin{
+class _MainPageViewState extends State<MainPageView> with _Mixin {
   MFile? _file;
 
   bool _isLoading = true;
@@ -36,7 +36,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
 
   final RegExp _numberBetweenBrackets = RegExp(r'^.*?\((\d+)\).*$');
 
-  int _totalSize = 0;
+  int _max = 0;
   int _sizeUploaded = 0;
   final ValueNotifier<String> _sizeText = ValueNotifier<String>("");
 
@@ -44,8 +44,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
   void initState() {
     super.initState();
     context.afterBuild((p0) {
-      _listenSizes();
-      _loadFile();
+      _init();
     });
   }
 
@@ -57,22 +56,35 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
   void _listenSizes() {
     FCloudDb.listenSizes().listen((event) {
       if (event.exists) {
-        _totalSize = event.data()?['totalSize'] ?? 0;
+        int plusSize = event.data()?['plusSize'] ?? 0;
         _sizeUploaded = event.data()?['sizeUploaded'] ?? 0;
 
-        _sizeText.value = "${_sizeUploaded.byte}/${_totalSize.byte}";
+        _max = Settings.settings!.minByte! + plusSize;
+
+        _sizeText.value = "${_sizeUploaded.byte}/${_max.byte}";
       }
     });
   }
 
-  void _loadFile() async {
+  void _listenFile() {
+    FCloudDb.listenFile().listen((event) {
+      if (event.exists) {
+        _file = MFile.fromJson(event.data() as Map<String, dynamic>);
+        setState(() {});
+      }
+    });
+  }
+
+  void _init() async {
     setState(() {
       _isLoading = true;
     });
-    _file = await FCloudDb.getFile();
+    await FCloudDb.getSettings();
     _isLoading = false;
     _checkUpload = false;
     setState(() {});
+    _listenSizes();
+    _listenFile();
   }
 
   Future<String> _setFileName(String fileName, String fileType) async {
@@ -130,21 +142,21 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
   }
 
   void _upload() async {
-    final ImagePicker picker = ImagePicker();
-    // Pick an image
-    var imageFromGallery = await picker.pickImage(source: ImageSource.gallery);
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-    if (imageFromGallery == null) return;
+    if (result == null) return;
 
     CustomProgressIndicator().showProgressIndicator(context);
 
-    String type = imageFromGallery.path.split(".").last;
+    PlatformFile platformFile = result.files.single;
 
-    File file = File(imageFromGallery.path);
+    String type = platformFile.extension!;
+
+    File file = File(result.files.single.path!);
 
     int size = await file.length();
 
-    if ((_sizeUploaded + size) > _totalSize) {
+    if ((_sizeUploaded + size) > _max) {
       context.back();
 
       CustomDialog.showMyDialog(
@@ -176,7 +188,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
 
         MFile mFile = MFile(
           downloadUrl: downloadUrl,
-          fileName: "file",
+          fileName: platformFile.name,
           fileType: type,
           fileSize: size,
         );
@@ -189,7 +201,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
             text: "Upload successful!",
             actions: [const SimpleButton(title: "OK")]);
 
-        _loadFile();
+        _init();
       },
       () {
         _isLoading = false;
@@ -215,15 +227,16 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
                 return Text(value);
               },
             ),
-            TextButton(onPressed: upgrade, child: Text("Upgrade")),
-            const Spacer(),
+            TextButton(onPressed: upgrade, child: const Text("Upgrade")),
+            context.sizedBox(height: 0.1),
             Text("File Name: ${_file?.fileName}"),
             Text("File Type: ${_file?.fileType}"),
             Text("File Size: ${_file?.fileSize}"),
             Text("File Upload Date: ${_file?.uploadDate}"),
+            context.sizedBox(height: 0.05),
             _getButton(),
+            context.sizedBox(height: 0.03),
             const Divider(),
-            _refreshButton(),
             context.sizedBox(height: 0.03),
             FilledButton(onPressed: _upload, child: const Text("Upload"))
                 .toEmpty(_progress != null),
@@ -244,12 +257,9 @@ class _MainPageViewState extends State<MainPageView> with _Mixin{
     return ElevatedButton(onPressed: _download, child: const Text("Download"));
   }
 
-  IconButton _refreshButton() =>
-      IconButton(onPressed: _loadFile, icon: const Icon(Icons.refresh));
-
   AppBar _appBar() {
     return AppBar(
-      title: const Text("AllDrop"),
+      title: const Text("AllDrop").toBold(),
       actions: [
         IconButton(
           onPressed: _logOut,

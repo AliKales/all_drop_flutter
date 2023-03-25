@@ -48,7 +48,9 @@ extension IntExtension on int {
   String get byte {
     int length = toString().length;
 
-    if (length >= 4 && length <= 6) {
+    if (length >= 1 && length <= 3) {
+      return "$this B";
+    } else if (length >= 4 && length <= 6) {
       return "${this / 1000} KB";
     } else if (length >= 7 && length <= 9) {
       return "${this / 1000000} MB";
