@@ -186,9 +186,13 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
 
         _checkUpload = true;
 
+        List<String> splittedName = platformFile.name.split(".");
+
+        splittedName.removeLast();
+
         MFile mFile = MFile(
           downloadUrl: downloadUrl,
-          fileName: platformFile.name,
+          fileName: splittedName.join(""),
           fileType: type,
           fileSize: size,
         );
