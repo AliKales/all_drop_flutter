@@ -1,3 +1,4 @@
+import 'package:all_drop/core/h_hive.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await HHive().init();
 
   runApp(const MyApp());
 }

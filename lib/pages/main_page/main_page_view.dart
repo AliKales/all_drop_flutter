@@ -40,6 +40,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
   int _sizeUploaded = 0;
   final ValueNotifier<String> _sizeText = ValueNotifier<String>("");
 
+
   @override
   void initState() {
     super.initState();
@@ -263,7 +264,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
 
   AppBar _appBar() {
     return AppBar(
-      title: const Text("AllDrop").toBold(),
+      title: const Text("AllDrop"),
       actions: [
         IconButton(
           onPressed: _logOut,

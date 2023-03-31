@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:all_drop/router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uikit/uikit.dart';
 
 import '../../common_libs.dart';
@@ -30,7 +32,7 @@ class FAuth {
   static void sendVerification() =>
       FirebaseAuth.instance.currentUser!.sendEmailVerification();
 
-  static Future reload() async {
+  static Future reload([BuildContext? context]) async {
     await FirebaseAuth.instance.currentUser!.reload();
   }
 
@@ -184,5 +186,15 @@ class FAuth {
     } catch (_) {
       return "Error";
     }
+  }
+
+  static Future<bool> reAuth(String email, String password) async {
+    var credential =
+        EmailAuthProvider.credential(email: email, password: password);
+
+    await FirebaseAuth.instance.currentUser
+        ?.reauthenticateWithCredential(credential);
+
+    return true;
   }
 }

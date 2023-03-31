@@ -9,4 +9,6 @@ class Settings {
   static String pathToDownloadFile = "/storage/emulated/0/Download";
 
   static MSettings? settings;
+
+  static int alreadyVerified = 2;
 }

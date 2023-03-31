@@ -2,7 +2,10 @@
 
 import 'package:all_drop/common_libs.dart';
 import 'package:all_drop/core/firebase/f_auth.dart';
+import 'package:all_drop/core/h_hive.dart';
 import 'package:all_drop/router.dart';
+import 'package:all_drop/settings.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:uikit/uikit.dart';
@@ -69,12 +72,24 @@ class _PhonePageViewState extends State<PhonePageView> {
     _pC.animateToPage(page, duration: 300.toDuration, curve: Curves.ease);
   }
 
-  void _back() {
-    _tECPhone.clear();
-    _smsCode = "";
-    _tECCode.clear();
-    _changePage();
+  void _alreadyVerified() async {
+    Settings.alreadyVerified = Settings.alreadyVerified - 1;
+
+    await FAuth.reload(context);
+
+    if (FAuth.getPhone.isEmptyOrNull) {
+      setState(() {});
+      return;
+    }
+
+    String password = await HHive.getFromDatabase(HiveKeys.password.name);
+
+    await FAuth.reAuth(FAuth.getEmail!, password);
+
+    context.go(PagePaths.main);
   }
+
+  bool get _alreadyVerifyLimit => Settings.alreadyVerified == 0;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +124,10 @@ class _PhonePageViewState extends State<PhonePageView> {
             onPressed: _sendCode,
             child: const Text("SEND CODE"),
           ),
-          TextButton(onPressed: _back, child: Text("BACK")),
+          TextButton(
+                  onPressed: _alreadyVerified,
+                  child: const Text("ALREADY VERIFIED!"))
+              .toEmpty(_alreadyVerifyLimit),
           const Spacer(),
         ],
       ),
@@ -146,7 +164,7 @@ class _PhonePageViewState extends State<PhonePageView> {
         IconButton(
           onPressed: _logOut,
           color: Colors.red,
-          icon: Icon(Icons.logout),
+          icon: const Icon(Icons.logout),
         ),
       ],
     );

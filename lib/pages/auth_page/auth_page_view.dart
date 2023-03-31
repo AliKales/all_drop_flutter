@@ -1,6 +1,8 @@
 import 'package:all_drop/common_libs.dart';
 import 'package:all_drop/core/firebase/f_auth.dart';
+import 'package:all_drop/core/h_hive.dart';
 import 'package:all_drop/router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uikit/uikit.dart';
 
@@ -37,6 +39,7 @@ class _AuthPageViewState extends State<AuthPageView> {
         context, _tECUsername.textTrim, _tECPassword.textTrim);
 
     if (result) {
+      await _savePassword();
       context.go(PagePaths.main);
     }
   }
@@ -48,8 +51,13 @@ class _AuthPageViewState extends State<AuthPageView> {
         context, _tECUsername.textTrim, _tECPassword.textTrim);
 
     if (result) {
+      await _savePassword();
       context.go("/");
     }
+  }
+
+  Future<void> _savePassword() async {
+    await HHive.putToDatabase(HiveKeys.password.name, _tECPassword.textTrim);
   }
 
   @override
@@ -68,6 +76,7 @@ class _AuthPageViewState extends State<AuthPageView> {
             TextField(
               controller: _tECPassword,
               decoration: const InputDecoration(labelText: "Password"),
+              obscureText: true,
             ),
             const Spacer(),
             ElevatedButton(onPressed: _logIn, child: const Text("Log In")),
