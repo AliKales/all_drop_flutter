@@ -17,7 +17,7 @@ class PagePaths {
 
 final appRouter = GoRouter(
   initialLocation: PagePaths.main,
-  // errorBuilder: (context, state) => const MainPageView(),
+  errorBuilder: (context, state) => const MainPageView(),
   redirect: (context, state) {
     if (!FAuth.isSignedIn) {
       Settings.routes.add(PagePaths.auth);

@@ -9,7 +9,7 @@ class FStorage {
     File file,
     String type,
     Function(String?) onProgress,
-    Function(String) onDone,
+    Function() onDone,
     VoidCallback onError,
   ) {
     var ref = FirebaseStorage.instance.ref("files/${FAuth.getUid}/file.$type");
@@ -24,7 +24,7 @@ class FStorage {
     task.snapshotEvents.listen((event) async {
       if (event.bytesTransferred == event.totalBytes) {
         onProgress.call(null);
-        onDone.call(await ref.getDownloadURL());
+        onDone.call();
       } else {
         onProgress.call("${event.bytesTransferred}/${event.totalBytes}");
       }

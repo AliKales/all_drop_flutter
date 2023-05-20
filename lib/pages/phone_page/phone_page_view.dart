@@ -2,10 +2,10 @@
 
 import 'package:all_drop/common_libs.dart';
 import 'package:all_drop/core/firebase/f_auth.dart';
+import 'package:all_drop/core/firebase/f_cloud_db.dart';
 import 'package:all_drop/core/h_hive.dart';
 import 'package:all_drop/router.dart';
 import 'package:all_drop/settings.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:uikit/uikit.dart';
@@ -23,6 +23,8 @@ class _PhonePageViewState extends State<PhonePageView> {
   final TextEditingController _tECCode = TextEditingController();
   String _smsCode = "";
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _pC.dispose();
@@ -31,8 +33,17 @@ class _PhonePageViewState extends State<PhonePageView> {
     super.dispose();
   }
 
+  void _changeLoading() {
+    setState(() {
+      _isLoading = !_isLoading;
+    });
+  }
+
   void _sendCode() {
     if (_tECPhone.textTrim == "") return;
+
+    _changeLoading();
+
     FAuth.verifyPhoneNumber(
       codeSent: () {
         _changePage();
@@ -47,9 +58,13 @@ class _PhonePageViewState extends State<PhonePageView> {
   Future<void> _updatePhoneNumber() async {
     if (_smsCode.length < 6) return;
 
+    _changeLoading();
+
     String result = await FAuth.updatePhoneNumber(_smsCode);
 
     if (result == "") {
+      await FCloudDb.setUserSize();
+
       context.go(PagePaths.main);
     } else {
       CustomSnackbar.showSnackBar(context: context, text: result);
@@ -70,6 +85,7 @@ class _PhonePageViewState extends State<PhonePageView> {
     }
 
     _pC.animateToPage(page, duration: 300.toDuration, curve: Curves.ease);
+    Future.delayed(350.toDuration).then((value) => _changeLoading());
   }
 
   void _alreadyVerified() async {
@@ -120,14 +136,16 @@ class _PhonePageViewState extends State<PhonePageView> {
                 prefixText: "+"),
           ),
           const Spacer(),
-          FilledButton(
-            onPressed: _sendCode,
-            child: const Text("SEND CODE"),
-          ),
+          _isLoading
+              ? const CircularProgressIndicator.adaptive()
+              : FilledButton(
+                  onPressed: _sendCode,
+                  child: const Text("SEND CODE"),
+                ),
           TextButton(
                   onPressed: _alreadyVerified,
                   child: const Text("ALREADY VERIFIED!"))
-              .toEmpty(_alreadyVerifyLimit),
+              .toEmpty(_alreadyVerifyLimit || _isLoading),
           const Spacer(),
         ],
       ),
@@ -147,10 +165,12 @@ class _PhonePageViewState extends State<PhonePageView> {
             onChanged: (value) => _smsCode = value,
           ),
           const Spacer(),
-          FilledButton(
-            onPressed: _updatePhoneNumber,
-            child: const Text("VERIFY"),
-          ),
+          _isLoading
+              ? const CircularProgressIndicator.adaptive()
+              : FilledButton(
+                  onPressed: _updatePhoneNumber,
+                  child: const Text("VERIFY"),
+                ),
           const Spacer(),
         ],
       ),

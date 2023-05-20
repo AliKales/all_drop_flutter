@@ -7,12 +7,14 @@ import 'package:all_drop/core/firebase/f_cloud_db.dart';
 import 'package:all_drop/core/firebase/f_storage.dart';
 import 'package:all_drop/core/models/m_file.dart';
 import 'package:all_drop/core/utils.dart';
+import 'package:all_drop/main.dart';
 import 'package:all_drop/router.dart';
 import 'package:all_drop/settings.dart';
 import 'package:all_drop/widgets/simple_buttons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uikit/uikit.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../core/firebase/f_auth.dart';
 
@@ -40,7 +42,6 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
   int _sizeUploaded = 0;
   final ValueNotifier<String> _sizeText = ValueNotifier<String>("");
 
-
   @override
   void initState() {
     super.initState();
@@ -62,7 +63,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
 
         _max = Settings.settings!.minByte! + plusSize;
 
-        _sizeText.value = "${_sizeUploaded.byte}/${_max.byte}";
+        _sizeText.value = "${_sizeUploaded.byte} / ${_max.byte}";
       }
     });
   }
@@ -81,6 +82,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
       _isLoading = true;
     });
     await FCloudDb.getSettings();
+    await checkVersionAndAvailable();
     _isLoading = false;
     _checkUpload = false;
     setState(() {});
@@ -112,13 +114,15 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
     return fullName;
   }
 
-  void _download() async {
+  void _download2(String url) async {
+    context.back();
+
     String fullName =
         await _setFileName(_file!.fileName ?? "file", _file!.fileType!);
 
     DDio.download(
       context,
-      _file!.downloadUrl!,
+      url,
       fullName,
       onProgress: (p0, p1) {
         _progress = "$p0/$p1";
@@ -129,6 +133,15 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
         }
         setState(() {});
       },
+    );
+  }
+
+  void _download() async {
+    CustomProgressIndicator().showProgressIndicator(context);
+
+    FCloudDb.requestDownloadUrl(
+      _file!.fileType!,
+      (url) => _download2(url),
     );
   }
 
@@ -164,7 +177,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
         context: context,
         title: "Error",
         text:
-            "You will be out of your total size so you cant upload this file!",
+            "You will be out of your total size so you can't upload this file!",
       );
 
       return;
@@ -182,7 +195,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
           _progress = p0;
         });
       },
-      (downloadUrl) async {
+      () async {
         if (_checkUpload) return;
 
         _checkUpload = true;
@@ -192,7 +205,6 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
         splittedName.removeLast();
 
         MFile mFile = MFile(
-          downloadUrl: downloadUrl,
           fileName: splittedName.join(""),
           fileType: type,
           fileSize: size,
@@ -236,8 +248,9 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
             context.sizedBox(height: 0.1),
             Text("File Name: ${_file?.fileName}"),
             Text("File Type: ${_file?.fileType}"),
-            Text("File Size: ${_file?.fileSize}"),
-            Text("File Upload Date: ${_file?.uploadDate}"),
+            Text("File Size: ${_file?.fileSize!.byte}"),
+            Text(
+                "File Upload Date: ${(_file?.uploadDate?.toDateAndHour) ?? ""}"),
             context.sizedBox(height: 0.05),
             _getButton(),
             context.sizedBox(height: 0.03),

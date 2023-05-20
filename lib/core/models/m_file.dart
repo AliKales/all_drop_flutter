@@ -2,14 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class MFile extends Equatable {
-  String? downloadUrl;
   String? fileName;
   int? fileSize;
   String? fileType;
   DateTime? uploadDate;
 
   MFile({
-    this.downloadUrl,
     this.fileName,
     this.fileSize,
     this.fileType,
@@ -17,22 +15,20 @@ class MFile extends Equatable {
   });
 
   @override
-  List<Object> get props =>
-      [downloadUrl ?? "", fileName ?? "", fileSize ?? "", fileType ?? ""];
+  List<Object> get props => [fileName ?? "", fileSize ?? "", fileType ?? ""];
 
   Map<String, dynamic> toJson() {
     return {
-      'downloadUrl': downloadUrl,
       'fileName': fileName,
       'fileSize': fileSize,
       'fileType': fileType,
-      'uploadDate': uploadDate,
+      'uploadDate': FieldValue.serverTimestamp(),
+      'readByServer': true,
     };
   }
 
   factory MFile.fromJson(Map<String, dynamic> json) {
     return MFile(
-      downloadUrl: json['downloadUrl'] as String?,
       fileName: json['fileName'] as String?,
       fileSize: json['fileSize'] as int?,
       fileType: json['fileType'] as String?,

@@ -6,6 +6,8 @@ import 'firebase_options.dart';
 import 'router.dart';
 import 'styles/theme.dart';
 
+int version = 1;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

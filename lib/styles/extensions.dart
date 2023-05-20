@@ -51,11 +51,14 @@ extension IntExtension on int {
     if (length >= 1 && length <= 3) {
       return "$this B";
     } else if (length >= 4 && length <= 6) {
-      return "${this / 1000} KB";
+      var kb = this / 1000;
+      return "${kb.toStringAsFixed(2)} KB";
     } else if (length >= 7 && length <= 9) {
-      return "${this / 1000000} MB";
+      var mb = this / 1000000;
+      return "${mb.toStringAsFixed(2)} MB";
     } else {
-      return "${this / 1000000000} GB";
+      var gb = this / 1000000000;
+      return "${gb.toStringAsFixed(2)} GB";
     }
   }
 }
@@ -324,6 +327,10 @@ extension DateTimeExtension on DateTime {
 
   String get toStringFromDate {
     return "$day/$month/$year";
+  }
+
+  String get toDateAndHour {
+    return "$toStringFromDate  $hhMM";
   }
 
   DateTime get toLocalDate {
