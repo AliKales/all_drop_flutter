@@ -5,6 +5,7 @@ import 'package:all_drop/common_libs.dart';
 import 'package:all_drop/core/d_dio.dart';
 import 'package:all_drop/core/firebase/f_cloud_db.dart';
 import 'package:all_drop/core/firebase/f_storage.dart';
+import 'package:all_drop/core/mixin_admob.dart';
 import 'package:all_drop/core/models/m_file.dart';
 import 'package:all_drop/core/utils.dart';
 import 'package:all_drop/main.dart';
@@ -27,7 +28,7 @@ class MainPageView extends StatefulWidget {
   State<MainPageView> createState() => _MainPageViewState();
 }
 
-class _MainPageViewState extends State<MainPageView> with _Mixin {
+class _MainPageViewState extends State<MainPageView> with _Mixin, MixinAdmob {
   MFile? _file;
 
   bool _isLoading = true;
@@ -139,10 +140,12 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
   void _download() async {
     CustomProgressIndicator().showProgressIndicator(context);
 
-    FCloudDb.requestDownloadUrl(
-      _file!.fileType!,
-      (url) => _download2(url),
-    );
+    showInterstitialAd(() {
+      FCloudDb.requestDownloadUrl(
+        _file!.fileType!,
+        (url) => _download2(url),
+      );
+    });
   }
 
   void _doneDownload() {
@@ -162,6 +165,12 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
 
     CustomProgressIndicator().showProgressIndicator(context);
 
+    showInterstitialAd(() {
+      _upload2(result);
+    });
+  }
+
+  void _upload2(FilePickerResult result) async {
     PlatformFile platformFile = result.files.single;
 
     String type = platformFile.extension!;
@@ -230,7 +239,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
   }
 
   void _handleDownloadOtherPlatforms() {
-    launchUrlString("https://alldrop.net",
+    launchUrlString("https://alldrop.net?download=true",
         mode: LaunchMode.externalApplication);
   }
 
@@ -269,6 +278,7 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
               child: const Text("Download on Windows & MacOS"),
             ),
             const Spacer(),
+            widgetBanner(),
           ],
         ),
       ),
