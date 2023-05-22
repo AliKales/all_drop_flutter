@@ -229,6 +229,11 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
     );
   }
 
+  void _handleDownloadOtherPlatforms() {
+    launchUrlString("https://alldrop.net",
+        mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -258,6 +263,11 @@ class _MainPageViewState extends State<MainPageView> with _Mixin {
             context.sizedBox(height: 0.03),
             FilledButton(onPressed: _upload, child: const Text("Upload"))
                 .toEmpty(_progress != null),
+            const Spacer(),
+            TextButton(
+              onPressed: _handleDownloadOtherPlatforms,
+              child: const Text("Download on Windows & MacOS"),
+            ),
             const Spacer(),
           ],
         ),
